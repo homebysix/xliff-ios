@@ -55,7 +55,7 @@ def updateFile(filename):
         print ("WAS: {}".format(fontSetting.attrib))
 
         isSystemFont = (fontSetting.attrib.get("type") == "system")
-
+        systemFontWeight = None
         if isSystemFont:
             systemFontWeight = fontSetting.attrib.get("weight")  
             fontSetting.attrib.pop('type', None)
@@ -148,7 +148,7 @@ if os.path.isfile(filename):
     updateFile(filename)
 else:
     os.chdir(filename)
-    for file in glob.glob("*.storyboard"):
+    for file in glob.iglob("./**/*.storyboard",recursive=True):
         print ("---------------------------FILE:{}---------------------------".format(file))
         updateFile(file)
 
