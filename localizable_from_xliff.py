@@ -3,6 +3,8 @@
 import lxml.etree as Parser, os
 from lxml import etree
 import sys
+import subprocess
+
 
 try:
     filename = sys.argv[1]
@@ -14,7 +16,11 @@ def createFullTagName(text):
     return "{urn:oasis:names:tc:xliff:document:1.2}" + text
 
 def do_something_with_file(filename):
-    nodes = Parser.parse(filename)
+ 
+    subprocess.run(["xcodebuild", "-exportLocalizations","-localizationPath",".","-project",filename, "-exportLanguage", "en"])
+    
+    
+    nodes = Parser.parse("en.xliff")
     root = nodes.getroot()
     with open("Localizable.strings", 'w') as out:
  
