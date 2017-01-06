@@ -9,38 +9,57 @@ import subprocess
 try:
     filename = sys.argv[1]
 except IndexError:
-    print ("You must supply a file name.")
+    print ("You must supply the xcode project path.")
     sys.exit(2)
+
+
+NO_COMMENT_TEXT = "(No Commment)"
+
 
 def createFullTagName(text):
     return "{urn:oasis:names:tc:xliff:document:1.2}" + text
 
-def do_something_with_file(filename):
- 
-    subprocess.run(["xcodebuild", "-exportLocalizations","-localizationPath",".","-project",filename, "-exportLanguage", "en"])
-    
-    
-    nodes = Parser.parse("en.xliff")
-    root = nodes.getroot()
-    with open("Localizable.strings", 'w') as out:
- 
-	    for f in root:
-	    	if f.attrib['original'].endswith("Localizable.strings"):
-		    	body = f.find(createFullTagName('body'))
-		    	for trans in body.iter(createFullTagName('trans-unit')):
-		    		note = trans.find(createFullTagName('note'))
-		    		source = trans.find(createFullTagName('source'))
+def start(filename):
 
-		    		note_text = ""
-		    		if note != None and len(note.text) != 0:
-		    			note_text = note.text
-		    		else:
-		    			note_text = "No comment provided by engineer."
-		    		out.write ('/* ' + note_text + ' */' + '\n')
-		    		out.write ('"' + source.text + '"' + "=" '"' + source.text + '";' + '\n')
-		    		out.write ('\n')
+	subprocess.run(["xcodebuild", "-exportLocalizations","-localizationPath",".","-project",filename, "-exportLanguage", "en"])
+
+	nodes = Parser.parse("en.xliff")
+
+	root = nodes.getroot()
+
+	with open("Localizable.strings", 'w') as out:
+
+		for f in root:
+
+			if f.attrib['original'].endswith("Localizable.strings"):
+
+				body = f.find(createFullTagName('body'))
+
+				print("--------------------Localizable has {} trans-units--------------------".format(len(body)))
+
+				trans_unit_iter = body.iter(createFullTagName('trans-unit'))
+
+				for trans in trans_unit_iter:
+					unit_id = trans.attrib['id']
+
+					note = trans.find(createFullTagName('note'))
+
+					en_target = trans.find(createFullTagName('target'))
+
+					note_text = None
+
+					if len(note.text) != 0:
+						note_text = note.text
+					else:
+						note_text = NO_COMMENT_TEXT
+
+					out.write ('/* ' + note_text + ' */' + '\n')
+					out.write ('"' + unit_id + '"' + "=" '"' + en_target.text + '";' + '\n')
+					out.write ('\n')
+
+				break
 
 
 
-do_something_with_file(filename)
+start(filename)
 
