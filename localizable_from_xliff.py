@@ -25,7 +25,7 @@ def start(filename):
 
 	nodes = Parser.parse("en.xliff")
 
-	root = nodes.getroot()
+	root = nodes.getroot() # switch to xliff node
 
 	with open("Localizable.strings", 'w') as out:
 
@@ -35,11 +35,10 @@ def start(filename):
 
 				body = f.find(createFullTagName('body'))
 
-				print("--------------------Localizable has {} trans-units--------------------".format(len(body)))
+				translation_list = []
 
-				trans_unit_iter = body.iter(createFullTagName('trans-unit'))
+				for trans in body.iter(createFullTagName('trans-unit')):
 
-				for trans in trans_unit_iter:
 					unit_id = trans.attrib['id']
 
 					note = trans.find(createFullTagName('note'))
@@ -48,13 +47,20 @@ def start(filename):
 
 					note_text = None
 
-					if len(note.text) != 0:
+					if note != None and len(note.text) != 0:
 						note_text = note.text
 					else:
 						note_text = NO_COMMENT_TEXT
 
-					out.write ('/* ' + note_text + ' */' + '\n')
-					out.write ('"' + unit_id + '"' + "=" '"' + en_target.text + '";' + '\n')
+					translation_list.append((note_text,unit_id,en_target.text))
+
+				print("--------------------Localizable has {} trans-units--------------------".format(len(translation_list)))
+				
+				translation_list.sort()
+
+				for unit in translation_list:
+					out.write ('/* ' + unit[0] + ' */' + '\n')
+					out.write ('"' + unit[1] + '"' + "=" '"' + unit[2] + '";' + '\n')
 					out.write ('\n')
 
 				break
