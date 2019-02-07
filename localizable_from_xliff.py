@@ -13,7 +13,7 @@ except IndexError:
     sys.exit(2)
 
 
-NO_COMMENT_TEXT = "(No Commment)"
+NO_COMMENT_TEXT = "(No Comment)"
 
 
 def createFullTagName(text):
